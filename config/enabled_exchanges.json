@@ -1,0 +1,11 @@
+[
+  {
+    "exchange_id": "binance",
+    "enabled": true
+  },
+  {
+    "exchange_id": "bybit",
+    "enabled": true
+  }
+]
+

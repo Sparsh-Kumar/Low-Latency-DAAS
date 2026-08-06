@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+HOOK_DIRECTORY="$(
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &&
+  pwd
+)"
+
+PROJECT_ROOT="$(
+  cd -- "$HOOK_DIRECTORY/.." &&
+  pwd
+)"
+
+exec "$PROJECT_ROOT/scripts/lint-jobs.sh"
+

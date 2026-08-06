@@ -1,0 +1,75 @@
+# Defines the live-tickers job package, supported Python versions, and runtime dependencies.
+[project]
+name = "live-tickers"
+version = "0.1.0"
+description = "Streams live cryptocurrency tickers from multiple enabled exchanges"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "ccxt==4.5.28",
+  "colorama==0.4.6",
+  "pymongo==4.16.0",
+  "python-dotenv==1.2.2",
+  "schedule==1.2.2",
+  "deepdiff==9.1.0",
+  "lib_exception",
+  "lib_logger",
+]
+
+# Defines dependencies used only for development, testing, linting, and type checking.
+[dependency-groups]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+  "pytest-cov>=6,<7",
+  "ruff>=0.9,<1",
+  "mypy>=1.14,<2",
+]
+
+# Tells uv that this directory is an application rather than an installable Python package.
+[tool.uv]
+package = false
+
+# Maps the shared library dependency names to their directories in this repository.
+[tool.uv.sources]
+lib_exception = { path = "../../libs/lib-exception" }
+lib_logger = { path = "../../libs/lib-logger" }
+
+# Configures pytest discovery, asyncio behavior, and coverage reporting.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--cov=job",
+  "--cov-report=term-missing",
+]
+
+# Configures Ruff's Python target, line length, and source directories.
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = [".", "tests"]
+
+# Selects the Ruff lint-rule families enforced for this job.
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "ASYNC",
+]
+
+# Configures Ruff's automatic code-formatting style.
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# Enables strict mypy type checking for Python 3.12.
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "."
+strict = true
+warn_unused_configs = true
