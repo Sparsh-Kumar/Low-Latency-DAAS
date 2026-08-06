@@ -49,6 +49,7 @@ addopts = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+indent-width = 2
 src = [".", "tests"]
 
 # Selects the Ruff lint-rule families enforced for this job.

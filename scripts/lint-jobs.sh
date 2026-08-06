@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 # git config core.hooksPath .githooks
+# sudo chmod +x ./.githooks/pre-commit
+# sudo chmod +x ./scripts/lint-jobs.sh
 
 set -uo pipefail
 

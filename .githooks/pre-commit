@@ -14,3 +14,4 @@ PROJECT_ROOT="$(
 
 exec "$PROJECT_ROOT/scripts/lint-jobs.sh"
 
+

@@ -1,12 +1,15 @@
 import asyncio
-from exception.missing_exception import MissingException # type: ignore
-from exception.validation_exception import ValidationException # type: ignore
-from logger.logger import CustomLogger # type: ignore
+
+from exception.missing_exception import MissingException  # type: ignore
+from exception.validation_exception import ValidationException  # type: ignore
+from logger.logger import CustomLogger  # type: ignore
 
 
 async def main() -> None:
-  pass
+  print(MissingException)
+  print(ValidationException)
+  print(CustomLogger)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
   asyncio.run(main())
-
