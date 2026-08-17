@@ -466,6 +466,17 @@ wheels = [
 ]
 
 [[package]]
+name = "lib-database"
+version = "0.0.0"
+source = { directory = "../../libs/lib-database" }
+dependencies = [
+    { name = "pymongo" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pymongo", specifier = "==4.16.0" }]
+
+[[package]]
 name = "lib-exception"
 version = "0.0.0"
 source = { directory = "../../libs/lib-exception" }
@@ -524,6 +535,7 @@ dependencies = [
     { name = "ccxt" },
     { name = "colorama" },
     { name = "deepdiff" },
+    { name = "lib-database" },
     { name = "lib-exception" },
     { name = "lib-logger" },
     { name = "pymongo" },
@@ -545,6 +557,7 @@ requires-dist = [
     { name = "ccxt", specifier = "==4.5.28" },
     { name = "colorama", specifier = "==0.4.6" },
     { name = "deepdiff", specifier = "==9.1.0" },
+    { name = "lib-database", directory = "../../libs/lib-database" },
     { name = "lib-exception", directory = "../../libs/lib-exception" },
     { name = "lib-logger", directory = "../../libs/lib-logger" },
     { name = "pymongo", specifier = "==4.16.0" },
