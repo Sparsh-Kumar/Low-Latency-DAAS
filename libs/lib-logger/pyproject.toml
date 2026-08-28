@@ -2,21 +2,14 @@
 requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
-# Defines the live-trades job package, supported Python versions, and runtime dependencies.
 [project]
-name = "live-trades"
+name = "lib-logger"
 version = "0.1.0"
-description = "Streams live cryptocurrency trades from multiple exchanges"
+description = "Shared abstraction layer for logger."
+readme = "README.md"
 requires-python = ">=3.12,<3.14"
 dependencies = [
-  "ccxt==4.5.28",
-  "colorama==0.4.6",
-  "pymongo==4.16.0",
-  "python-dotenv==1.2.2",
-  "schedule==1.2.2",
-  "deepdiff==9.1.0",
-  "lib-exception",
-  "lib-logger",
+  "colorama==0.4.6"
 ]
 
 # Defines dependencies used only for development, testing, linting, and type checking.
@@ -31,12 +24,11 @@ dev = [
 
 # Tells uv that this directory is an application rather than an installable Python package.
 [tool.uv]
-package = false
+package = true
 
-# Maps the shared library dependency names to their directories in this repository.
-[tool.uv.sources]
-lib-exception = { path = "../../libs/lib-exception" }
-lib-logger = { path = "../../libs/lib-logger" }
+# This tells Hatchling to package your existing directory.
+[tool.hatch.build.targets.wheel]
+packages = ["logger"]
 
 # Configures pytest discovery, asyncio behavior, and coverage reporting.
 [tool.pytest.ini_options]
@@ -45,7 +37,7 @@ asyncio_mode = "auto"
 addopts = [
   "--strict-config",
   "--strict-markers",
-  "--cov=job",
+  "--cov=logger",
   "--cov-report=term-missing",
 ]
 

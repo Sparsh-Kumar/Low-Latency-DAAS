@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
 # Defines the live-tickers job package, supported Python versions, and runtime dependencies.
 [project]
 name = "live-tickers"
@@ -11,9 +15,9 @@ dependencies = [
   "python-dotenv==1.2.2",
   "schedule==1.2.2",
   "deepdiff==9.1.0",
-  "lib_exception",
-  "lib_logger",
-  "lib_database"
+  "lib-exception",
+  "lib-logger",
+  "lib-database"
 ]
 
 # Defines dependencies used only for development, testing, linting, and type checking.
@@ -32,9 +36,9 @@ package = false
 
 # Maps the shared library dependency names to their directories in this repository.
 [tool.uv.sources]
-lib_exception = { path = "../../libs/lib-exception" }
-lib_logger = { path = "../../libs/lib-logger" }
-lib_database = { path = "../../libs/lib-database" }
+lib-exception = { path = "../../libs/lib-exception" }
+lib-logger = { path = "../../libs/lib-logger" }
+lib-database = { path = "../../libs/lib-database" }
 
 # Configures pytest discovery, asyncio behavior, and coverage reporting.
 [tool.pytest.ini_options]

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
 # Defines the live-orderbooks job package, supported Python versions, and runtime dependencies.
 [project]
 name = "live-orderbooks"
@@ -11,8 +15,8 @@ dependencies = [
   "python-dotenv==1.2.2",
   "schedule==1.2.2",
   "deepdiff==9.1.0",
-  "lib_exception",
-  "lib_logger",
+  "lib-exception",
+  "lib-logger",
 ]
 
 # Defines dependencies used only for development, testing, linting, and type checking.
@@ -31,8 +35,8 @@ package = false
 
 # Maps the shared library dependency names to their directories in this repository.
 [tool.uv.sources]
-lib_exception = { path = "../../libs/lib-exception" }
-lib_logger = { path = "../../libs/lib-logger" }
+lib-exception = { path = "../../libs/lib-exception" }
+lib-logger = { path = "../../libs/lib-logger" }
 
 # Configures pytest discovery, asyncio behavior, and coverage reporting.
 [tool.pytest.ini_options]

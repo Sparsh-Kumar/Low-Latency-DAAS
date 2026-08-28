@@ -13,7 +13,7 @@ with open(join(dir, 'requirements.txt')) as requirements:
   package_requirements = requirements.read().splitlines()
 
 setuptools.setup(
-  name='lib_logger',
+  name='lib-logger',
   description='Re-usable logger utility for the application.',
   long_description=long_description,
   long_description_content_type='text/markdown',

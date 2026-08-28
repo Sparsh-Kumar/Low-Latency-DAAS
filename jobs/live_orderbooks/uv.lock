@@ -467,12 +467,23 @@ wheels = [
 
 [[package]]
 name = "lib-exception"
-version = "0.0.0"
+version = "0.1.0"
 source = { directory = "../../libs/lib-exception" }
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.14,<2" },
+    { name = "pytest", specifier = ">=8.3,<9" },
+    { name = "pytest-asyncio", specifier = ">=0.25,<1" },
+    { name = "pytest-cov", specifier = ">=6,<7" },
+    { name = "ruff", specifier = ">=0.9,<1" },
+]
 
 [[package]]
 name = "lib-logger"
-version = "0.0.0"
+version = "0.1.0"
 source = { directory = "../../libs/lib-logger" }
 dependencies = [
     { name = "colorama" },
@@ -480,6 +491,15 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "colorama", specifier = "==0.4.6" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.14,<2" },
+    { name = "pytest", specifier = ">=8.3,<9" },
+    { name = "pytest-asyncio", specifier = ">=0.25,<1" },
+    { name = "pytest-cov", specifier = ">=6,<7" },
+    { name = "ruff", specifier = ">=0.9,<1" },
+]
 
 [[package]]
 name = "librt"

@@ -15,11 +15,11 @@ For a uv-managed job, declare the package and its local source in `pyproject.tom
 ```toml
 [project]
 dependencies = [
-  "lib_exception",
+  "lib-exception",
 ]
 
 [tool.uv.sources]
-lib_exception = { path = "../../libs/lib-exception" }
+lib-exception = { path = "../../libs/lib-exception" }
 ```
 
 ## Exceptions

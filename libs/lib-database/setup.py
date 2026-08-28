@@ -13,7 +13,7 @@ with open(join(dir, 'requirements.txt')) as requirements:
   package_requirements = requirements.read().splitlines()
 
 setuptools.setup(
-  name='lib_database',
+  name='lib-database',
   description='Re-usable database wrapper utility.',
   long_description=long_description,
   long_description_content_type='text/markdown',

@@ -15,11 +15,11 @@ For a uv-managed job, declare the package and its local source in `pyproject.tom
 ```toml
 [project]
 dependencies = [
-  "lib_logger",
+  "lib-logger",
 ]
 
 [tool.uv.sources]
-lib_logger = { path = "../../libs/lib-logger" }
+lib-logger = { path = "../../libs/lib-logger" }
 ```
 
 ## Usage
