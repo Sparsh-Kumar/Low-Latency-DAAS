@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lib-common"
+version = "0.1.0"
+description = "Shared common library used by multiple jobs."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = []
+
+# Defines dependencies used only for development, testing, linting, and type checking.
+[dependency-groups]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+  "pytest-cov>=6,<7",
+  "ruff>=0.9,<1",
+  "mypy>=1.14,<2",
+]
+
+# Tells uv that this directory is an application rather than an installable Python package.
+[tool.uv]
+package = true
+
+# This tells Hatchling to package your existing directory.
+[tool.hatch.build.targets.wheel]
+packages = ["common"]
+
+# Configures pytest discovery, asyncio behavior, and coverage reporting.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--cov=common",
+  "--cov-report=term-missing",
+]
+
+# Configures Ruff's Python target, line length, and source directories.
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+indent-width = 2
+src = [".", "tests"]
+
+# Selects the Ruff lint-rule families enforced for this job.
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "ASYNC",
+]
+
+# Configures Ruff's automatic code-formatting style.
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# Enables strict mypy type checking for Python 3.12.
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "."
+strict = true
+warn_unused_configs = true
+
+

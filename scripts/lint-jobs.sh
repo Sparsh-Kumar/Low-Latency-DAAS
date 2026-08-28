@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # git config core.hooksPath .githooks
-# sudo chmod +x ./.githooks/pre-commit
-# sudo chmod +x ./scripts/lint-jobs.sh
+# chmod +x ./.githooks/pre-commit
+# chmod +x ./scripts/lint-projects.sh
 
 set -uo pipefail
 
@@ -16,59 +16,72 @@ PROJECT_ROOT="$(
   pwd
 )"
 
-JOBS_DIRECTORY="$PROJECT_ROOT/jobs"
+PROJECT_DIRECTORIES=(
+  "$PROJECT_ROOT/jobs"
+  "$PROJECT_ROOT/libs"
+)
 
 overall_status=0
-jobs_checked=0
+projects_checked=0
 
-for job_directory in "$JOBS_DIRECTORY"/*; do
-  [[ -d "$job_directory" ]] || continue
-
-  job_name="$(basename "$job_directory")"
-  pyproject_file="$job_directory/pyproject.toml"
-  lock_file="$job_directory/uv.lock"
-
-  echo
-  echo "Checking job: $job_name"
-
-  if [[ ! -f "$pyproject_file" ]]; then
-    echo "ERROR: $job_name does not contain pyproject.toml"
+for parent_directory in "${PROJECT_DIRECTORIES[@]}"; do
+  if [[ ! -d "$parent_directory" ]]; then
+    echo "ERROR: Directory does not exist: $parent_directory"
     overall_status=1
     continue
   fi
 
-  if ! grep -q '^\[tool\.ruff\]' "$pyproject_file"; then
-    echo "ERROR: $job_name does not contain Ruff configuration"
-    overall_status=1
-    continue
-  fi
+  project_type="$(basename "$parent_directory")"
 
-  if [[ ! -f "$lock_file" ]]; then
-    echo "ERROR: $job_name does not contain uv.lock"
-    overall_status=1
-    continue
-  fi
+  for project_directory in "$parent_directory"/*; do
+    [[ -d "$project_directory" ]] || continue
 
-  jobs_checked=$((jobs_checked + 1))
+    project_name="$(basename "$project_directory")"
+    pyproject_file="$project_directory/pyproject.toml"
+    lock_file="$project_directory/uv.lock"
 
-  if ! uv run \
-    --project "$job_directory" \
-    --locked \
-    ruff check "$job_directory"; then
-    overall_status=1
-  fi
+    echo
+    echo "Checking $project_type project: $project_name"
 
-  if ! uv run \
-    --project "$job_directory" \
-    --locked \
-    ruff format --check "$job_directory"; then
-    overall_status=1
-  fi
+    if [[ ! -f "$pyproject_file" ]]; then
+      echo "ERROR: $project_name does not contain pyproject.toml"
+      overall_status=1
+      continue
+    fi
+
+    if ! grep -q '^\[tool\.ruff\]' "$pyproject_file"; then
+      echo "ERROR: $project_name does not contain Ruff configuration"
+      overall_status=1
+      continue
+    fi
+
+    if [[ ! -f "$lock_file" ]]; then
+      echo "ERROR: $project_name does not contain uv.lock"
+      overall_status=1
+      continue
+    fi
+
+    projects_checked=$((projects_checked + 1))
+
+    if ! uv run \
+      --project "$project_directory" \
+      --locked \
+      ruff check "$project_directory"; then
+      overall_status=1
+    fi
+
+    if ! uv run \
+      --project "$project_directory" \
+      --locked \
+      ruff format --check "$project_directory"; then
+      overall_status=1
+    fi
+  done
 done
 
-if [[ "$jobs_checked" -eq 0 ]]; then
+if [[ "$projects_checked" -eq 0 ]]; then
   echo
-  echo "ERROR: No jobs were checked."
+  echo "ERROR: No jobs or libraries were checked."
   exit 1
 fi
 

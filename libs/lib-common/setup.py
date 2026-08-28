@@ -14,8 +14,8 @@ with open(join(dir, "requirements.txt")) as requirements:
   package_requirements = requirements.read().splitlines()
 
 setuptools.setup(
-  name="lib-exception",
-  description="Re-usable custom exceptions utility for the application.",
+  name="lib-common",
+  description="Re-usable common utility library.",
   long_description=long_description,
   long_description_content_type="text/markdown",
   url="",
