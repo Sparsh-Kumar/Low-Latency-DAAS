@@ -15,7 +15,10 @@ class MongoDatabase(BaseDatabase):
   def get_database(self, database_name: str | None = None) -> Database:
     if not database_name:
       raise Exception("Database name is required.")
-    return self._database_client[database_name]
+    database_instance: Database = self._database_client.get(database_name, None)
+    if not database_instance:
+      raise Exception(f"No database exists with database name = {database_name}.")
+    return database_instance
 
   def get_table(self, database: Database, table_name: str | None = None) -> Collection:
     if not database:
