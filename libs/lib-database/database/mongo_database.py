@@ -25,7 +25,10 @@ class MongoDatabase(BaseDatabase):
       raise Exception("Database instance is required.")
     if not table_name:
       raise Exception("Table name is required.")
-    return database[table_name]
+    table_instance = database.get(table_name, None)
+    if not table_instance:
+      raise Exception(f"No table exists with name = {table_name}.")
+    return table_instance
 
   def find_one(
     self,
