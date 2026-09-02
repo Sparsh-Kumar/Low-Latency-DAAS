@@ -384,17 +384,149 @@ def test_mongo_insert_one_calls_function_in_table_instance() -> None:
   mongo_table_instance.insert_one.assert_called_once_with({"_id": 1})
 
 
-def test_mongo_insert_one() -> None:
-  pass
+def test_mongo_insert_many_throws_exception_if_table_not_provided() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.insert_many.return_value = [{"status": "success"}]
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  with pytest.raises(Exception, match=r"^Table instance is required.$"):
+    mongo_database.insert_many()
 
 
-def test_mongo_insert_many() -> None:
-  pass
+def test_mongo_insert_many_throws_exception_if_records_not_provided() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.insert_many.return_value = [{"status": "success"}]
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  mongo_database_instance = mongo_database.get_database("sample_db")
+  mongo_table_instance = mongo_database.get_table(mongo_database_instance, "first_table")
+
+  with pytest.raises(Exception, match=r"^Records to insert are required.$"):
+    mongo_database.insert_many(mongo_table_instance)
 
 
-def test_mongo_delete_one() -> None:
-  pass
+def test_mongo_insert_many_calls_function_in_table_instance() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.insert_many.return_value = [{"status": "success"}]
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  mongo_database_instance = mongo_database.get_database("sample_db")
+  mongo_table_instance = mongo_database.get_table(mongo_database_instance, "first_table")
+
+  insert_response = mongo_database.insert_many(mongo_table_instance, [{"_id": 1}, {"_id": 2}])
+
+  assert insert_response == [{"status": "success"}]
+  mongo_table_instance.insert_many.assert_called_once_with([{"_id": 1}, {"_id": 2}])
 
 
-def test_mongo_delete_many() -> None:
-  pass
+def test_mongo_delete_one_throws_exception_if_table_not_provided() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.delete_one.return_value = {"status": "success"}
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  with pytest.raises(Exception, match=r"^Table instance is required.$"):
+    mongo_database.delete_one()
+
+
+def test_mongo_delete_one_throws_exception_if_record_id_not_provided() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.delete_one.return_value = {"status": "success"}
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  mongo_database_instance = mongo_database.get_database("sample_db")
+  mongo_table_instance = mongo_database.get_table(mongo_database_instance, "first_table")
+
+  with pytest.raises(Exception, match=r"^Record id is required for deletion.$"):
+    mongo_database.delete_one(mongo_table_instance)
+
+
+def test_mongo_delete_one_calls_function_in_table_instance() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.delete_one.return_value = {"status": "success"}
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  mongo_database_instance = mongo_database.get_database("sample_db")
+  mongo_table_instance = mongo_database.get_table(mongo_database_instance, "first_table")
+
+  delete_record_response = mongo_database.delete_one(mongo_table_instance, 123)
+
+  assert delete_record_response == {"status": "success"}
+  mongo_table_instance.delete_one.assert_called_once_with({"_id": 123})

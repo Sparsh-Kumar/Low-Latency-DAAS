@@ -74,7 +74,7 @@ class MongoDatabase(BaseDatabase):
     if not table:
       raise Exception("Table instance is required.")
     if not record_id:
-      raise Exception("Record id is required for deletion")
+      raise Exception("Record id is required for deletion.")
     return table.delete_one({"_id": record_id})
 
   def delete_many(self, table: Any | None = None, filter: dict[str, Any] | None = None) -> None:
