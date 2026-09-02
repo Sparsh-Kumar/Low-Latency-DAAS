@@ -530,3 +530,52 @@ def test_mongo_delete_one_calls_function_in_table_instance() -> None:
 
   assert delete_record_response == {"status": "success"}
   mongo_table_instance.delete_one.assert_called_once_with({"_id": 123})
+
+
+def test_mongo_delete_many_throws_exception_if_table_not_provided() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.delete_many.return_value = {"status": "success"}
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  with pytest.raises(Exception, match=r"^Table instance is required.$"):
+    mongo_database.delete_many()
+
+
+def test_mongo_delete_many_calls_function_in_table_instance() -> None:
+
+  database_url = "mongodb://localhost:27017"
+  mongo_database = MongoDatabase(database_url)
+
+  mongo_table_instance_mock = MagicMock()
+  mongo_table_instance_mock.delete_many.return_value = {"status": "success"}
+
+  mongo_database_instance_mock = MagicMock()
+  mongo_database_instance_mock.get.return_value = mongo_table_instance_mock
+
+  mongo_client_mock = MagicMock()
+  mongo_client_mock.get.return_value = mongo_database_instance_mock
+
+  with patch("database.mongo_database.MongoClient") as mongo_client:
+    mongo_client.return_value = mongo_client_mock
+    mongo_database.initialize()
+
+  mongo_database_instance = mongo_database.get_database("sample_db")
+  mongo_table_instance = mongo_database.get_table(mongo_database_instance, "first_table")
+
+  delete_records_response = mongo_database.delete_many(mongo_table_instance, {"id": 123})
+
+  assert delete_records_response == {"status": "success"}
+  mongo_table_instance.delete_many.assert_called_once_with({"id": 123})
