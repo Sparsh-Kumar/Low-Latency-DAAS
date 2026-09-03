@@ -1,0 +1,19 @@
+services:
+
+  mongodb:
+    ports:
+      - "27017:27017"
+
+  postgresdb:
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    ports:
+      - "5050:80"
+
+  mongo-express:
+    ports:
+      - "8081:8081"
+
+

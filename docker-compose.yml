@@ -4,9 +4,6 @@ services:
   mongodb:
     image: mongo:8.0.29
     container_name: mongo_db
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:?required}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?required}
@@ -23,9 +20,6 @@ services:
   postgresdb:
     image: postgres:18.6
     container_name: postgres_db
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
@@ -40,18 +34,29 @@ services:
       start_period: 30s
 
 
-  web_interface:
-    image: dbeaver/cloudbeaver:latest
-    container_name: dbeaver_ui
-    restart: unless-stopped
-    ports:
-      - "8080:8978"
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:?required}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?required}
     volumes:
-      - cloudbeaver-data:/opt/cloudbeaver/workspace
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo_express
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH_ENABLED: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME:?required}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:?required}
     depends_on:
       mongodb:
-        condition: service_healthy
-      postgresdb:
         condition: service_healthy
 
 
@@ -60,7 +65,7 @@ volumes:
     driver: local
   postgres-data:
     driver: local
-  cloudbeaver-data:
+  pgadmin-data:
     driver: local
 
 

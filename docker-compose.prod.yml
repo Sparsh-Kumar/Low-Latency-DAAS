@@ -1,0 +1,50 @@
+services:
+
+  mongodb:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'       # Hard cap: Max 2 CPU cores
+          memory: 4G        # Hard cap: Max 4GB RAM before OOM kill
+        reservations:
+          cpus: '0.5'       # Soft guarantee: At least 0.5 CPU core reserved
+          memory: 1G        # Soft guarantee: Requires at least 1GB free RAM to boot
+
+  postgresdb:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'       # Hard cap: Max 2 CPU cores
+          memory: 4G        # Hard cap: Max 4GB RAM before OOM kill
+        reservations:
+          cpus: '0.5'       # Soft guarantee: At least 0.5 CPU core reserved
+          memory: 1G        # Soft guarantee: Requires at least 1GB free RAM to boot
+
+  pgadmin:
+    restart: always
+    ports:
+      - "127.0.0.1:5050:80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'       # Hard cap: Max 0.5 CPU core
+          memory: 512M      # Hard cap: Max 512MB RAM
+        reservations:
+          cpus: '0.1'       # Soft guarantee: Minimal CPU reserved
+          memory: 128M      # Soft guarantee: 128MB RAM reserved
+
+  mongo-express:
+    restart: always
+    ports:
+      - "127.0.0.1:8081:8081"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'       # Hard cap: Max 0.5 CPU core
+          memory: 512M      # Hard cap: Max 512MB RAM
+        reservations:
+          cpus: '0.1'       # Soft guarantee: Minimal CPU reserved
+          memory: 128M      # Soft guarantee: 128MB RAM reserved
+
