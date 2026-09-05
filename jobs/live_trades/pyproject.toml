@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 [project]
 name = "live-trades"
 version = "0.1.0"
-description = "Streams live cryptocurrency trades from multiple exchanges"
+description = "Streams live cryptocurrency trades from multiple enabled exchanges"
 requires-python = ">=3.12,<3.14"
 dependencies = [
   "ccxt==4.5.28",
@@ -17,6 +17,7 @@ dependencies = [
   "deepdiff==9.1.0",
   "lib-exception",
   "lib-logger",
+  "lib-database"
 ]
 
 # Defines dependencies used only for development, testing, linting, and type checking.
@@ -37,6 +38,7 @@ package = false
 [tool.uv.sources]
 lib-exception = { path = "../../libs/lib-exception" }
 lib-logger = { path = "../../libs/lib-logger" }
+lib-database = { path = "../../libs/lib-database" }
 
 # Configures pytest discovery, asyncio behavior, and coverage reporting.
 [tool.pytest.ini_options]
@@ -50,7 +52,7 @@ asyncio_mode = "auto"
 addopts = [
   "--strict-config",
   "--strict-markers",
-  "--cov=job",
+  "--cov=trades",
   "--cov-report=term-missing",
 ]
 
@@ -83,5 +85,3 @@ python_version = "3.12"
 mypy_path = "."
 strict = true
 warn_unused_configs = true
-
-

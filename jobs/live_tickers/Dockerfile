@@ -3,16 +3,19 @@ FROM python:3.12-slim
 WORKDIR /home/source
 
 RUN useradd --create-home appuser \
-  && pip install --no-cache-dir uv
+    && pip install --no-cache-dir uv
 
 COPY libs ./libs
 COPY config ./config
+
 COPY jobs/live_tickers/pyproject.toml ./jobs/live_tickers/pyproject.toml
+COPY jobs/live_tickers/uv.lock ./jobs/live_tickers/uv.lock
 
 RUN uv sync \
-  --project jobs/live_tickers \
-  --no-dev \
-  --no-cache
+    --project jobs/live_tickers \
+    --locked \
+    --no-dev \
+    --no-cache
 
 COPY jobs/live_tickers ./jobs/live_tickers
 
@@ -23,4 +26,5 @@ RUN chown -R appuser:appuser /home/source
 
 USER appuser
 
-CMD ["python", "jobs/live_tickers/job.py"]
+CMD ["python", "jobs/live_tickers/tickers/job.py"]
+
