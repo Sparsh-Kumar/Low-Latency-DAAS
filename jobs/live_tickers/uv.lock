@@ -472,12 +472,14 @@ source = { directory = "../../libs/lib-database" }
 dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "pymongo" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = "==3.3.4" },
     { name = "pymongo", specifier = "==4.16.0" },
+    { name = "python-dotenv", specifier = "==1.2.2" },
 ]
 
 [package.metadata.requires-dev]
