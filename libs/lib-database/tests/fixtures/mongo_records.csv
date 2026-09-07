@@ -1,0 +1,5 @@
+name:str,age:int,email:str
+Alice,25,alice@example.com
+Bob,25,bob@example.com
+Charlie,35,charlie@example.com
+David,28,david@example.com
