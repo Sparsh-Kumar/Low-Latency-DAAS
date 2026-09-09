@@ -1,6 +1,8 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest  # type: ignore
+from psycopg.conninfo import make_conninfo  # type: ignore
+from psycopg.rows import dict_row  # type: ignore
 
 from database.postgres_database import PostgresDatabase
 
@@ -15,7 +17,7 @@ def test_postgres_initialize_correctly_create_connection(
   with patch("database.postgres_database.psycopg.connect", autospec=True) as postgres_connect:
     postgres_database.initialize()
 
-  postgres_connect.assert_called_once_with(database_url)
+  postgres_connect.assert_called_once_with(database_url, row_factory=dict_row)
   assert postgres_database._database_client is postgres_connect.return_value
 
 
@@ -30,7 +32,7 @@ def test_postgres_initialize_does_not_create_connection_if_already_exists(
     postgres_database.initialize()
     postgres_database.initialize()
 
-  postgres_connect.assert_called_once_with(database_url)
+  postgres_connect.assert_called_once_with(database_url, row_factory=dict_row)
   assert postgres_database._database_client is postgres_connect.return_value
 
 
@@ -59,14 +61,23 @@ def test_postgres_get_database_correctly_returns_database_instance_if_exists(
   database_url = postgres_test_connection_uri
   postgres_database = PostgresDatabase(database_url)
 
-  postgres_connection_mock = MagicMock()
+  postgres_client_mock = MagicMock()
+  postgres_database_mock = MagicMock()
 
   with patch("database.postgres_database.psycopg.connect", autospec=True) as postgres_connect:
-    postgres_connect.return_value = postgres_connection_mock
+    postgres_connect.side_effect = [postgres_client_mock, postgres_database_mock]
     postgres_database.initialize()
+    postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
-  assert postgres_database_instance is postgres_connection_mock
+  database_connection_uri = make_conninfo(
+    database_url,
+    dbname=postgres_test_database_name,
+  )
+  assert postgres_connect.call_args_list == [
+    call(database_url, row_factory=dict_row),
+    call(database_connection_uri, row_factory=dict_row),
+  ]
+  assert postgres_database_instance is postgres_database_mock
 
 
 @pytest.mark.unit
@@ -101,9 +112,8 @@ def test_postgres_get_table_throws_exception_if_table_name_not_provided(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   with pytest.raises(Exception, match=r"^Table name is required.$"):
-    postgres_database.get_table(postgres_database_instance)
+    postgres_database.get_table(postgres_connection_mock)
 
 
 @pytest.mark.unit
@@ -121,9 +131,8 @@ def test_postgres_get_table_returns_table_if_both_parameters_are_provided(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
   assert postgres_table_instance is not None
 
@@ -164,9 +173,8 @@ def test_postgres_find_one_calls_function_in_table_instance(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
   found_record = postgres_database.find_one(postgres_table_instance, {})
 
@@ -194,9 +202,8 @@ def test_postgres_find_one_calls_function_with_non_empty_args(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
   found_record = postgres_database.find_one(postgres_table_instance, {"id": 1})
 
@@ -242,9 +249,8 @@ def test_postgres_find_many_calls_function_in_table_instance(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
   found_records = postgres_database.find_many(postgres_table_instance, {})
 
@@ -272,9 +278,8 @@ def test_postgres_find_many_calls_function_with_non_empty_args(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
   found_records = postgres_database.find_many(postgres_table_instance, {"id": 1})
 
@@ -316,9 +321,8 @@ def test_postgres_insert_one_throws_exception_if_record_not_provided(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
   with pytest.raises(Exception, match=r"^Record to insert is required.$"):
@@ -340,9 +344,8 @@ def test_postgres_insert_one_calls_function_in_table_instance(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
   postgres_database.insert_one(postgres_table_instance, {"id": 1})
@@ -384,12 +387,11 @@ def test_postgres_insert_many_throws_exception_if_records_not_provided(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
-  with pytest.raises(Exception, match=r"^Record to insert is required.$"):
+  with pytest.raises(Exception, match=r"^Records to insert are required.$"):
     postgres_database.insert_many(postgres_table_instance)
 
 
@@ -410,9 +412,8 @@ def test_postgres_insert_many_calls_function_in_table_instance(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
   postgres_database.insert_many(postgres_table_instance, [{"id": 1}, {"id": 2}])
@@ -454,12 +455,11 @@ def test_postgres_delete_one_throws_exception_if_record_id_not_provided(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
-  with pytest.raises(Exception, match=r"^Record id is required for deletion$"):
+  with pytest.raises(Exception, match=r"^Record id is required for deletion.$"):
     postgres_database.delete_one(postgres_table_instance)
 
 
@@ -478,9 +478,8 @@ def test_postgres_delete_one_calls_function_in_table_instance(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
   postgres_database.delete_one(postgres_table_instance, "123")
@@ -522,9 +521,8 @@ def test_postgres_delete_many_throws_exception_if_filter_not_provided(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
   with pytest.raises(Exception, match=r"^Filter expression is required.$"):
@@ -546,9 +544,8 @@ def test_postgres_delete_many_calls_function_in_table_instance(
     postgres_connect.return_value = postgres_connection_mock
     postgres_database.initialize()
 
-  postgres_database_instance = postgres_database.get_database(postgres_test_database_name)
   postgres_table_instance = postgres_database.get_table(
-    postgres_database_instance, postgres_test_table_name
+    postgres_connection_mock, postgres_test_table_name
   )
 
   postgres_database.delete_many(postgres_table_instance, {"id": 123})

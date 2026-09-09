@@ -1,37 +1,47 @@
 from typing import Any
 
-import psycopg  # type: ignore
-from psycopg import Connection, sql  # type: ignore
+import psycopg
+from psycopg import Connection, sql
+from psycopg.conninfo import make_conninfo
+from psycopg.rows import dict_row
 
 from .base_database import BaseDatabase
-from .types import PostgresTable
+from .types import PostgresRecord, PostgresTable
 
 
 class PostgresDatabase(BaseDatabase):
   def initialize(self) -> None:
-    if not self._database_client:
-      self._database_client = psycopg.connect(self._database_url)
+    if self._database_client is None:
+      self._database_client = psycopg.connect(self._database_url, row_factory=dict_row)
 
-  def get_database(self, database_name: str | None = None) -> Connection:
+  def get_database(self, database_name: str | None = None) -> Connection[PostgresRecord]:
     if not database_name:
       raise Exception("Database name is required.")
-    return self._database_client
+    database_url = make_conninfo(self._database_url, dbname=database_name)
+    database_instance = psycopg.connect(database_url, row_factory=dict_row)
+    return database_instance
 
   def get_table(
-    self, database: Connection | None = None, table_name: str | None = None
+    self,
+    database: Connection[PostgresRecord] | None = None,
+    table_name: str | None = None,
   ) -> PostgresTable:
-    if not database:
+    if database is None:
       raise Exception("Database instance is required.")
-    if not table_name:
+    if table_name is None:
       raise Exception("Table name is required.")
-    return PostgresTable(database=database, table_name=sql.Identifier(table_name))
+    table_instance = PostgresTable(
+      database=database,
+      table_name=sql.Identifier(table_name),
+    )
+    return table_instance
 
   def find_one(
     self,
     table: PostgresTable | None = None,
     filter: dict[str, Any] | None = None,
-  ) -> Any:
-    if not table:
+  ) -> PostgresRecord | None:
+    if table is None:
       raise Exception("Table instance is required.")
     if not filter:
       filter = {}
@@ -54,8 +64,8 @@ class PostgresDatabase(BaseDatabase):
     self,
     table: PostgresTable | None = None,
     filter: dict[str, Any] | None = None,
-  ) -> Any:
-    if not table:
+  ) -> list[PostgresRecord]:
+    if table is None:
       raise Exception("Table instance is required.")
     if not filter:
       filter = {}
@@ -76,7 +86,7 @@ class PostgresDatabase(BaseDatabase):
   def insert_one(
     self, table: PostgresTable | None = None, record: dict[str, Any] | None = None
   ) -> None:
-    if not table:
+    if table is None:
       raise Exception("Table instance is required.")
     if not record:
       raise Exception("Record to insert is required.")
@@ -93,10 +103,10 @@ class PostgresDatabase(BaseDatabase):
   def insert_many(
     self, table: PostgresTable | None = None, records: list[dict[str, Any]] | None = None
   ) -> None:
-    if not table:
+    if table is None:
       raise Exception("Table instance is required.")
     if not records:
-      raise Exception("Record to insert is required.")
+      raise Exception("Records to insert are required.")
     column_names = list(records[0].keys())
     columns = [sql.Identifier(column) for column in column_names]
     placeholders = [sql.Placeholder() for _ in column_names]
@@ -111,12 +121,12 @@ class PostgresDatabase(BaseDatabase):
   def delete_one(
     self,
     table: PostgresTable | None = None,
-    record_id: str | None = None,
+    record_id: Any | None = None,
   ) -> None:
-    if not table:
+    if table is None:
       raise Exception("Table instance is required.")
-    if not record_id:
-      raise Exception("Record id is required for deletion")
+    if record_id is None:
+      raise Exception("Record id is required for deletion.")
     query = sql.SQL("DELETE FROM {} WHERE {} = %s").format(table.table_name, sql.Identifier("id"))
     table.database.execute(query, [record_id])
     table.database.commit()
@@ -126,7 +136,7 @@ class PostgresDatabase(BaseDatabase):
     table: PostgresTable | None = None,
     filter: dict[str, Any] | None = None,
   ) -> None:
-    if not table:
+    if table is None:
       raise Exception("Table instance is required.")
     if not filter:
       raise Exception("Filter expression is required.")
