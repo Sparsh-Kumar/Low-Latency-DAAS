@@ -61,6 +61,43 @@ uv run \
 
 Replace `live_tickers` with `live_trades` or `live_orderbooks` to work with another job.
 
+## Managing a Single Project
+
+Run these commands from the repository root. The examples target `jobs/live_tickers`;
+replace that path with any individual job or library, such as `jobs/live_trades` or
+`libs/lib-database`.
+
+Update the project's lock file to the latest compatible dependency versions without
+installing them:
+
+```bash
+uv lock --project jobs/live_tickers --upgrade
+```
+
+Update the lock file and synchronize the project's virtual environment:
+
+```bash
+uv sync --project jobs/live_tickers --upgrade
+```
+
+Run Ruff and automatically apply safe lint fixes:
+
+```bash
+uv run \
+  --project jobs/live_tickers \
+  --locked \
+  ruff check --fix jobs/live_tickers
+```
+
+Format the project's code with Ruff:
+
+```bash
+uv run \
+  --project jobs/live_tickers \
+  --locked \
+  ruff format jobs/live_tickers
+```
+
 ## Linting and Formatting
 
 Every job defines its Ruff configuration in its own `pyproject.toml`. The repository lint script iterates through every directory under `jobs/` and runs that job's lint and formatting checks.

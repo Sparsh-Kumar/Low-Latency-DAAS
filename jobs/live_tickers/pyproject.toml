@@ -17,7 +17,8 @@ dependencies = [
   "deepdiff==9.1.0",
   "lib-exception",
   "lib-logger",
-  "lib-database"
+  "lib-database",
+  "lib-common"
 ]
 
 # Defines dependencies used only for development, testing, linting, and type checking.
@@ -39,6 +40,7 @@ package = false
 lib-exception = { path = "../../libs/lib-exception" }
 lib-logger = { path = "../../libs/lib-logger" }
 lib-database = { path = "../../libs/lib-database" }
+lib-common = { path = "../../libs/lib-common" }
 
 # Configures pytest discovery, asyncio behavior, and coverage reporting.
 [tool.pytest.ini_options]
