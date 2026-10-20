@@ -39,6 +39,7 @@ Each job manages its dependencies with uv and can be developed, linted, tested, 
 - uv
 - Git
 - Docker, when building or running container images
+- dbmate, when creating or applying PostgreSQL migrations
 
 ## Setting Up a Job
 
@@ -97,6 +98,94 @@ uv run \
   --locked \
   ruff format jobs/live_tickers
 ```
+
+## Database Migrations with dbmate
+
+[dbmate](https://github.com/amacneil/dbmate) runs ordered SQL migrations and records
+which migrations have already been applied.
+
+Install it on macOS:
+
+```bash
+brew install dbmate
+```
+
+Configure the connection in the root `.env` file:
+
+```dotenv
+POSTGRES_DATABASE_URI=postgresql://root_user:root_pwd@localhost:5433/master_database?sslmode=disable
+```
+
+Run all commands from the repository root. `--env` expects an environment-variable
+name; use `--url` when passing a connection URL directly.
+
+Create a migration:
+
+```bash
+dbmate \
+  --env POSTGRES_DATABASE_URI \
+  --migrations-dir jobs/live_tickers/db/postgres/migrations \
+  --migrations-table migration_records \
+  new create_tickers
+```
+
+Migration files use this structure:
+
+```sql
+-- migrate:up
+
+-- SQL to apply the migration
+
+-- migrate:down
+
+-- SQL to roll back the migration
+```
+
+Create the database if needed and apply pending migrations:
+
+```bash
+dbmate \
+  --env POSTGRES_DATABASE_URI \
+  --migrations-dir jobs/live_tickers/db/postgres/migrations \
+  --migrations-table migration_records \
+  --no-dump-schema \
+  up
+```
+
+Apply pending migrations to an existing database:
+
+```bash
+dbmate \
+  --env POSTGRES_DATABASE_URI \
+  --migrations-dir jobs/live_tickers/db/postgres/migrations \
+  --migrations-table migration_records \
+  --no-dump-schema \
+  migrate
+```
+
+Show migration status:
+
+```bash
+dbmate \
+  --env POSTGRES_DATABASE_URI \
+  --migrations-dir jobs/live_tickers/db/postgres/migrations \
+  --migrations-table migration_records \
+  status
+```
+
+Roll back the latest migration:
+
+```bash
+dbmate \
+  --env POSTGRES_DATABASE_URI \
+  --migrations-dir jobs/live_tickers/db/postgres/migrations \
+  --migrations-table migration_records \
+  --no-dump-schema \
+  rollback
+```
+
+All jobs use the shared `migration_records` table in the common PostgreSQL database.
+Migration version numbers must therefore be unique across every job.
 
 ## Linting and Formatting
 

@@ -25,7 +25,29 @@ class LiveTickers(BaseJob):
       self._logger = CustomLogger()
 
 
-async def main(job_sleep_mins: int = 30) -> None:
+async def main() -> None:
+
+  postgres_instance: PostgresDatabase = PostgresDatabase(os.getenv("POSTGRES_DATABASE_URI"))
+  postgres_instance.initialize()
+
+  database_handle = postgres_instance.get_database(os.getenv("APPLICATION_DATABASE_NAME"))
+  exchange_table_handle = postgres_instance.get_table(
+    database_handle, os.getenv("ENABLED_EXCHANGES_TABLE_NAME")
+  )
+  enabled_exchanges = postgres_instance.find_many(exchange_table_handle)
+
+  print(enabled_exchanges, flush=True)
+
+  """
+  TODO:
+
+  For each enabled exchange
+    - Find tickers
+    - Add information in the database.
+  """
+
+
+async def scheduler(job_sleep_mins: int = 30) -> None:
 
   logger: CustomLogger = CustomLogger()
   logger.info(
@@ -38,15 +60,18 @@ async def main(job_sleep_mins: int = 30) -> None:
     f"{'=' * 80}\n"
   )
 
-  postgres_instance: PostgresDatabase = PostgresDatabase(os.getenv("POSTGRES_DATABASE_URI"))
-  postgres_instance.initialize()
+  while True:
+    try:
+      await main()
+    except Exception as e:
+      logger.error(f"Error executing main job: {e}")
 
-  print(postgres_instance)
+    await asyncio.sleep(job_sleep_mins * 60)
 
 
 if __name__ == "__main__":
-  job_sleep_mins: int = 30
+  job_sleep_mins: int = 1
   try:
-    asyncio.run(main(job_sleep_mins))
+    asyncio.run(scheduler(job_sleep_mins))
   except KeyboardInterrupt:
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Stopping scheduler... Goodbye!")
